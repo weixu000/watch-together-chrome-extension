@@ -10,7 +10,7 @@ function UserSignalHelper(div) {
   };
 
   const signal = new Promise((r) => {
-    div.querySelector("button").addEventListener("click", () => {
+    div.querySelector("button.submit").addEventListener("click", () => {
       r(JSON.parse(div.querySelector("textarea").value));
     });
   });
