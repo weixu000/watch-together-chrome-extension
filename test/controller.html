@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+
+  <body>
+    <video controls id="video1">
+      <source
+        src="https://cdn.videvo.net/videvo_files/video/premium/video0297/large_watermarked/601-1_601-0034_preview.mp4"
+        type="video/mp4"
+      />
+      Sorry, your browser doesn't support embedded videos.
+    </video>
+    <video controls id="video2">
+      <source
+        src="https://cdn.videvo.net/videvo_files/video/premium/video0297/large_watermarked/601-1_601-0034_preview.mp4"
+        type="video/mp4"
+      />
+      Sorry, your browser doesn't support embedded videos.
+    </video>
+
+    <script src="../js/direct_signal.js"></script>
+    <script src="../js/p2p.js"></script>
+    <script src="../js/video.js"></script>
+    <script src="../js/controller.js"></script>
+    <script>
+      const signalHelper = new DirectSignalHelper();
+
+      (async () => {
+        const channel = await p2pCaller(signalHelper);
+        console.log("caller ready");
+
+        const videoWrapper = new VideoWrapper(
+          document.querySelector("#video1")
+        );
+        new Controller("video1", videoWrapper, channel);
+      })().catch((e) => console.log(e));
+
+      (async () => {
+        const channel = await p2pCallee(signalHelper);
+        console.log("callee ready");
+
+        const videoWrapper = new VideoWrapper(
+          document.querySelector("#video2")
+        );
+        new Controller("video2", videoWrapper, channel);
+      })().catch((e) => console.log(e));
+    </script>
+  </body>
+</html>
