@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head> </head>
+
+  <body>
+    <script src="../js/p2p.js"></script>
+    <script src="../js/direct_signal.js"></script>
+    <script>
+      const signalHelper = new DirectSignalHelper();
+
+      (async () => {
+        const caller = await p2pCaller();
+        signalHelper.sendSignal("caller", caller.localSignal);
+        await caller.setRemoteSignal(await signalHelper.recvSignal("callee"));
+
+        const channel = await caller.getReady();
+        console.log("caller ready");
+
+        while (true) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          channel.send(Date.now());
+        }
+      })().catch((e) => console.log(e));
+
+      (async () => {
+        const callee = await p2pCallee();
+        await callee.setRemoteSignal(await signalHelper.recvSignal("caller"));
+        signalHelper.sendSignal("callee", callee.localSignal);
+
+        const channel = await callee.getReady();
+        console.log("callee ready");
+
+        channel.addEventListener("message", (e) => {
+          console.log(`Received ${e.data} ${Date.now() - e.data}`);
+        });
+      })().catch((e) => console.log(e));
+    </script>
+  </body>
+</html>
