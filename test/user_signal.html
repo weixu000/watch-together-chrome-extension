@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="../css/div_hidden.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div class="choose">
+      <button id="caller">Caller</button>
+      <button id="callee">Callee</button>
+    </div>
+    <div class="caller hidden">
+      <input type="text" />
+      <button class="submit">Go</button>
+      <p></p>
+    </div>
+    <div class="callee hidden">
+      <input type="text" />
+      <button>Go</button>
+      <p></p>
+    </div>
+
+    <script src="../js/p2p.js"></script>
+    <script src="../js/user_signal.js"></script>
+    <script>
+      const chooseDiv = document.querySelector("div.choose");
+      const callerDiv = document.querySelector("div.caller");
+      const calleeDiv = document.querySelector("div.callee");
+
+      chooseDiv.querySelector("#caller").addEventListener("click", async () => {
+        console.log("Caller clicked");
+        chooseDiv.classList.add("hidden");
+        callerDiv.classList.remove("hidden");
+
+        const signalHelper = new UserSignalHelper(callerDiv);
+        const caller = await p2pCaller();
+        signalHelper.sendSignal("caller", caller.localSignal);
+        await caller.setRemoteSignal(await signalHelper.recvSignal("callee"));
+
+        const channel = await caller.getReady();
+        console.log("caller ready");
+
+        while (true) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          channel.send(Date.now());
+        }
+      });
+      chooseDiv.querySelector("#callee").addEventListener("click", async () => {
+        console.log("Callee clicked");
+        chooseDiv.classList.add("hidden");
+        calleeDiv.classList.remove("hidden");
+
+        const signalHelper = new UserSignalHelper(calleeDiv);
+        const callee = await p2pCallee();
+        await callee.setRemoteSignal(await signalHelper.recvSignal("caller"));
+        signalHelper.sendSignal("callee", callee.localSignal);
+
+        const channel = await callee.getReady();
+        console.log("callee ready");
+
+        channel.addEventListener("message", (e) => {
+          console.log(`Received ${e.data} ${Date.now() - e.data}`);
+        });
+      });
+    </script>
+  </body>
+</html>
