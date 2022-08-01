@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="../css/div_hidden.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div class="choose">
+      <button id="caller">Caller</button>
+      <button id="callee">Callee</button>
+    </div>
+    <div class="caller hidden">
+      <textarea></textarea>
+      <button class="submit">Go</button>
+      <p></p>
+      <button class="copy-to-clipboard">Copy to Clipboard</button>
+    </div>
+    <div class="callee hidden">
+      <textarea></textarea>
+      <button class="submit">Go</button>
+      <p></p>
+      <button class="copy-to-clipboard">Copy to Clipboard</button>
+    </div>
+
+    <script src="js/p2p.js"></script>
+    <script src="js/user_signal.js"></script>
+    <script src="js/popup.js"></script>
+  </body>
+</html>
