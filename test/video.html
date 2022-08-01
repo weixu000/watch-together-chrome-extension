@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head> </head>
+
+  <body>
+    <video controls id="video1">
+      <source
+        src="https://cdn.videvo.net/videvo_files/video/premium/video0297/large_watermarked/601-1_601-0034_preview.mp4"
+        type="video/mp4"
+      />
+      Sorry, your browser doesn't support embedded videos.
+    </video>
+
+    <script src="../js/video.js"></script>
+    <script>
+      const videoWrapper = new VideoWrapper(document.querySelector("video"));
+      videoWrapper.on("statechange", (e) => {
+        console.log(`${e.detail.state} ${e.detail.time}`);
+      });
+    </script>
+  </body>
+</html>
