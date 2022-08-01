@@ -33,11 +33,7 @@
         callerDiv.classList.remove("hidden");
 
         const signalHelper = new UserSignalHelper(callerDiv);
-        const caller = await p2pCaller();
-        signalHelper.sendSignal("caller", caller.localSignal);
-        await caller.setRemoteSignal(await signalHelper.recvSignal("callee"));
-
-        const channel = await caller.getReady();
+        const channel = await p2pCaller(signalHelper);
         console.log("caller ready");
 
         while (true) {
@@ -51,11 +47,7 @@
         calleeDiv.classList.remove("hidden");
 
         const signalHelper = new UserSignalHelper(calleeDiv);
-        const callee = await p2pCallee();
-        await callee.setRemoteSignal(await signalHelper.recvSignal("caller"));
-        signalHelper.sendSignal("callee", callee.localSignal);
-
-        const channel = await callee.getReady();
+        const channel = await p2pCallee(signalHelper);
         console.log("callee ready");
 
         channel.addEventListener("message", (e) => {

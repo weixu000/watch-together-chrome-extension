@@ -40,7 +40,7 @@ const RTC_PEER_CONNECTION_CONFIG = {
   ],
 };
 
-async function p2pCaller() {
+async function p2pCaller(signalHelper) {
   const pc = new RTCPeerConnection(RTC_PEER_CONNECTION_CONFIG);
   const channel = new Promise((resolve) => {
     const ch = pc.createDataChannel("dataChannel");
@@ -49,32 +49,22 @@ async function p2pCaller() {
 
   const offer = await pc.createOffer();
   await pc.setLocalDescription(offer);
-  // console.log(offer);
-
   const iceCandidates = await gatherIceCandidates(pc);
+  signalHelper.sendSignal("caller", {
+    offer: offer,
+    iceCandidates: iceCandidates,
+  });
 
-  const setRemoteSignal = async function (signal) {
-    await pc.setRemoteDescription(signal.answer);
-    for (const candidate of signal.iceCandidates) {
-      await pc.addIceCandidate(candidate);
-    }
+  const signal = await signalHelper.recvSignal("callee");
+  await pc.setRemoteDescription(signal.answer);
+  for (const candidate of signal.iceCandidates) {
+    await pc.addIceCandidate(candidate);
+  }
 
-    this.getReady = async function () {
-      this.channel = await channel;
-      return this.channel;
-    };
-  };
-
-  return {
-    localSignal: {
-      offer: offer,
-      iceCandidates: iceCandidates,
-    },
-    setRemoteSignal: setRemoteSignal,
-  };
+  return await channel;
 }
 
-async function p2pCallee() {
+async function p2pCallee(signalHelper) {
   const pc = new RTCPeerConnection(RTC_PEER_CONNECTION_CONFIG);
   const channel = new Promise((resolve) => {
     pc.addEventListener("datachannel", (e) => {
@@ -82,30 +72,19 @@ async function p2pCallee() {
     });
   });
 
-  const setRemoteSignal = async function (signal) {
-    await pc.setRemoteDescription(signal.offer);
-    for (const candidate of signal.iceCandidates) {
-      await pc.addIceCandidate(candidate);
-    }
+  const signal = await signalHelper.recvSignal("caller");
+  await pc.setRemoteDescription(signal.offer);
+  for (const candidate of signal.iceCandidates) {
+    await pc.addIceCandidate(candidate);
+  }
 
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    const iceCandidates = await gatherIceCandidates(pc);
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  const iceCandidates = await gatherIceCandidates(pc);
+  signalHelper.sendSignal("callee", {
+    answer: answer,
+    iceCandidates: iceCandidates,
+  });
 
-    this.localSignal = {
-      answer: answer,
-      iceCandidates: iceCandidates,
-    };
-
-    this.getReady = async function () {
-      this.channel = await channel;
-      return this.channel;
-    };
-  };
-
-  const callee = {
-    setRemoteSignal: setRemoteSignal,
-  };
-
-  return callee;
+  return await channel;
 }
