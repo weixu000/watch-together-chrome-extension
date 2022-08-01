@@ -6,16 +6,29 @@ async function gatherIceCandidates(pc) {
     // console.log(e.candidate);
     iceCandidates.push(e.candidate);
   });
-  await new Promise((resolve) => {
+
+  const iceComplete = new Promise((resolve) => {
     pc.addEventListener("icegatheringstatechange", () => {
       console.log(pc.iceGatheringState);
       switch (pc.iceGatheringState) {
         case "complete":
+          console.log("ice gathering complete");
           resolve();
           break;
       }
     });
   });
+  const receivedOne = new Promise(async (resolve) => {
+    await new Promise((r) => setTimeout(r, 10000));
+    console.log(
+      "ice gathering takes too long, waiting for at least one candidate"
+    );
+    while (iceCandidates.length == 0) {
+      await new Promise((r) => setTimeout(r, 10));
+    }
+    resolve();
+  });
+  await Promise.any([iceComplete, receivedOne]);
 
   return iceCandidates;
 }
