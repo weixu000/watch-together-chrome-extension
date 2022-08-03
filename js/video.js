@@ -38,6 +38,7 @@ function VideoWrapper(videoElement) {
     const event = new CustomEvent("statechange", {
       detail: { state: state, time: videoElement.currentTime },
     });
+    console.log(event);
     eventTarget.dispatchEvent(event);
   };
 
